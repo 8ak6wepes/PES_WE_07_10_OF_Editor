@@ -14,43 +14,50 @@ option_file_data:
     OF_BLOCK : [
         12,
         5144, 
-        7608, 
+        7608,
         12092, 
         34920, 
-        649560, 
+        649560,
         739800, 
-        751252, 
+        751240,
         914696, 
-        1070332, 
-        1074144,
+        1070320,
+        1072924,
     ]
 
     OF_BLOCK_SIZE : [
-        4852, 
+        4852,
         2296, 
-        4472, 
-        22816, 
+        4484,
+        22828, 
         613800, 
-        90224, 
+        90240, 
         11440, 
-        163432, 
+        163456, 
         155624, 
-        2600, 
-        20752,
+        2604, 
+        22756,
     ]
 
 Player:
+    Size             : 124    # confirmed: BS[4]/124 exact for all tested games
+    First Edited Id  : 32768  # confirmed: 0x8000 boundary, consistent all games
+    ML Legend Slots  : 10     # standard ML roster boundary
+    ML Youth Slots   : 140    # standard ML roster boundary
+    Shop Slots       : 160    # standard shop player slots
+    ML Default Slots : 28     # standard ML default slots
     First Unused : 4941
 
 Teams:
     Total Nations : 60
     Total Classic : 7
     Total J Nations : 0
-    Total J Clubs : 1
+    Total J Clubs : 1     # Japan Reserve team
     J League Extra Clubs : 0
     Max Players In Nations : 23
     Max Players In Clubs : 32
     Separator Size : 1
+    Total ML Slots : 3
 
 Club:
     Size : 88
@@ -63,12 +70,25 @@ Stadiums:
     Max Lenght : 61
 
 Leagues:
-    Total : 33
+    Total : 31
+
+Logo:
+    Total   : 80    # confirmed: 80×608B fits exactly between kits and emblems
+    Size    : 608   # confirmed: 32B header + 32×32px @ 4bpp + alignment = 608B
+
+Emblem:
+    Total   : 21    # confirmed: BS[8]/7360=21 remainder 1064, all tested games
+    Size 128: 5184  # confirmed across all games
+    Size 16 : 2176  # confirmed across all games
+
+Formation:
+    Size    : 364   # confirmed: F0+364 differs from F0 in all tested games
+    Alt Size: 82    # standard alternate formation size
 
 Kits:
     Nation Kit Data Size : 456
     Club Kit Data Size : 648
-    Kit Data Size : 88
+    Kit Data Size : 152
 
 Shop:
     Points Offset : 5208
@@ -497,6 +517,3 @@ GROWTH TYPES:
         41,
         90,
     ]
-
-
-

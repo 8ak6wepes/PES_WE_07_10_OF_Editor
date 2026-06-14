@@ -1,8 +1,14 @@
 import struct
 
 class Shop:
-    POINTS_OFFSET_1 = 52
-    POINTS_OFFSET_2 = 0
+    # ── Fixed constant (same for all PS2 WE/PES titles) ───────────────────────
+    POINTS_OFFSET_1 = 52  # offset in B[0] (unencrypted block) of GP copy 1
+
+    # ── Config-injected class attributes ──────────────────────────────────────
+    # Sentinel defaults — real values set by OptionFile.__init__ from YAML.
+    POINTS_OFFSET_2     = 0     # Shop: Points Offset
+    unlock_offset_start = 5144  # Shop: Unlock Offset Start (defaults to B[1])
+    unlock_offset_end   = 5169  # Shop: Unlock Offset End
 
     def __init__(self,option_file):
         self.of = option_file

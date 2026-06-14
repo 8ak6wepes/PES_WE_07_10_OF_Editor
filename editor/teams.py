@@ -36,7 +36,10 @@ class Team:
 
     @property
     def is_club(self):
-        return self.real_idx < self.total_nations and self.real_idx is not None
+        # real_idx is set for both national/classic teams AND clubs.
+        # Clubs are teams that have a valid real_idx but are NOT national teams.
+        # This correctly handles JL CC games where total_nations=0.
+        return self.real_idx is not None and not self.is_national_team
 
 
     @property
@@ -181,10 +184,21 @@ class Team:
 
     @property
     def formations_start_address(self):
+        # JL CC games store club formations at the START of B[5] directly,
+        # not after the squad/dorsal data. Detected by total_j_clubs > 0.
+        if self.total_j_clubs > 0:
+            return self.dorsal_start_address
         return self.squad_start_address + self.first_club_slot * 2 + self.total_slots * 2
     
     def set_formation(self):
-        self.formation = Formation(self) if self.real_idx is not None else None
+        # JL CC games (total_j_clubs > 0) store formation data in a format
+        # that cannot be located or decoded from the accessible blocks.
+        # Setting formation=None causes all 32 squad slots to fall back to
+        # player.position.registered_position which is always correct.
+        if self.total_j_clubs > 0:
+            self.formation = None
+        else:
+            self.formation = Formation(self) if self.real_idx is not None else None
 
     def set_kits(self):
         self.kits = Kits(self) if self.real_idx is not None else None

@@ -67,6 +67,15 @@ Kits:
     Club Kit Data Size : 648
     Kit Data Size : 88
 
+Emblem:
+    Total   : 21    # confirmed: BS[8]=155624, 21×7360+1064 remainder
+    Size 128: 5184
+    Size 16 : 2176
+ 
+Logo:
+    Total   : 80    # confirmed for WE2008/09/11/12 (gap=48656=80×608+16pad)
+    Size    : 608
+    
 Shop:
     Points Offset : 5208
     Has Background Selector : False

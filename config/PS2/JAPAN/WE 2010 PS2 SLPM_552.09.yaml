@@ -62,10 +62,19 @@ Leagues:
     Total : 16 #33
 
 Kits:
-    Nation Kit Data Size : 456 #TBC
-    Club Kit Data Size : 648 #TBC
+    Nation Kit Data Size : 440 #456 #TBC
+    Club Kit Data Size : 632 #648 #TBC
     Kit Data Size : 88 #TBC
 
+Emblem:
+    Total   : 21    # confirmed: BS[8]=155624, 21×7360+1064 remainder
+    Size 128: 5184
+    Size 16 : 2176
+ 
+Logo:
+    Total   : 80    # confirmed for WE2008/09/11/12 (gap=48656=80×608+16pad)
+    Size    : 608
+    
 Shop:
     Points Offset : 5208 #TBC
     Has Background Selector : False #TBC

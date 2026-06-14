@@ -36,6 +36,12 @@ option_file_data:
     ]
 
 Player:
+    Size             : 124    # confirmed: BS[4]/124 exact for all tested games
+    First Edited Id  : 32768  # confirmed: 0x8000 boundary, consistent all games
+    ML Legend Slots  : 10     # standard ML roster boundary
+    ML Youth Slots   : 140    # standard ML roster boundary
+    Shop Slots       : 160    # standard shop player slots
+    ML Default Slots : 28     # standard ML default slots
     First Unused : 5080
 
 Teams:
@@ -47,7 +53,6 @@ Teams:
     Max Players In Nations : 23
     Max Players In Clubs : 32
     Separator Size : 1
-
 
 Club:
     Size : 88
@@ -62,6 +67,19 @@ Stadiums:
 Leagues:
     Total : 12 #29
 
+Logo:
+    Total   : 80    # confirmed: 80×608B fits exactly between kits and emblems
+    Size    : 608   # confirmed: 32B header + 32×32px @ 4bpp + alignment = 608B
+ 
+Emblem:
+    Total   : 21    # confirmed: BS[8]/7360=21 remainder 1064, all tested games
+    Size 128: 5184  # confirmed across all games
+    Size 16 : 2176  # confirmed across all games
+ 
+Formation:
+    Size    : 364   # confirmed: F0+364 differs from F0 in all tested games
+    Alt Size: 82    # standard alternate formation size
+ 
 Kits:
     Nation Kit Data Size : 352 #TBC
     Club Kit Data Size : 544 #TBC

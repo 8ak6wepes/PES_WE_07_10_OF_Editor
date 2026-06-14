@@ -63,11 +63,24 @@ Kits:
     Club Kit Data Size : 552
     Kit Data Size : 64
 
+Emblem:
+    Total   : 21    # confirmed: all JL CC games 21 emblems
+    Size 128: 5184
+    Size 16 : 2176
+ 
+Logo:
+    Total   : 80    # confirmed for JL CC 2007/2008/2009/2010 (gap=48656)
+    Size    : 608
+ 
 Shop:
     Points Offset : 5216
     Has Background Selector : True
     Total Backgrounds : 63
 
+Formation:
+    Size    : 476   # JL CC specific — 254 bytes per formation record  # Standard WE/PES games use 364
+    Alt Size: 82    # strategy 0 coordinates at address+118 (fits within 254)
+    
 NATIONS : [
     "Japan",
     "England",

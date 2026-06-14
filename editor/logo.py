@@ -1,13 +1,21 @@
 class Logo:
-    start_address = 0
-    total = 80
-    header_size = 32
-    size = 608
-    width = 32
-    height = 32
-    bpp = 4
-    palette_size = 1 << bpp
-    palette_pes_size = bpp * palette_size
+
+    # ── Fixed pixel-format constants (same for all PS2 WE/PES titles) ─────────
+    header_size      = 32   # bytes of header before pixel data in each record
+    width            = 32   # pixel width
+    height           = 32   # pixel height
+    bpp              = 4    # bits per pixel (16-colour indexed palette)
+    palette_pes_size = 64   # palette bytes: 2^bpp colours × 4 bytes RGBA = 16×4
+    #                         logo data layout: logo[:64] = palette, logo[64:] = pixels
+    #                         pixel data = width×height×bpp/8 = 32×32×4/8 = 512 bytes
+    #                         total logo field = header_size + palette + pixels = 608
+
+    # ── Config-injected class attributes ──────────────────────────────────────
+    # Sentinel defaults — real values set by OptionFile.__init__ from YAML.
+    # Logo: Total and Logo: Size in the game YAML override these.
+    start_address = 0    # set to Kits.end_address in OptionFile.__init__
+    total         = 80   # Logo: Total
+    size          = 608  # Logo: Size
 
     def __init__(self, option_file, idx):
         self.option_file = option_file
@@ -71,7 +79,3 @@ class Logo:
             self.set_pes_idat()
         else:
             raise ValueError("Image palette and idat size is not equals to the pes logo size")
-
-
-
-
