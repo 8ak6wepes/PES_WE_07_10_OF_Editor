@@ -1,498 +1,287 @@
+# =============================================================================
+# default.yaml — Fallback schema for PES/WE PS2 Option File Editor
+#
+# PURPOSE
+#   This file is the merge base for every game-specific YAML config.  When a
+#   game config is missing a key, the value here is used as the safe fallback.
+#   It is also loaded directly when no game config is found.
+#
+# DO NOT use this as a game config — OF_BYTE_LENGTH: 0 means no real file will
+# ever match it.  Add game-specific configs under config/PS2/<REGION>/.
+#
+# HOW IT IS USED
+#   gui/config.py loads the game YAML and deep-merges it on top of this file,
+#   so every key the editor accesses always has a value even if the game YAML
+#   is incomplete.  Missing required keys are reported as warnings on startup.
+#
+# KEY NAMING
+#   Key names must match exactly what the Python code accesses via
+#   config['Section']['Key'].  Do not rename keys without updating the code.
+# =============================================================================
+
+
+# ---------------------------------------------------------------------------
+# Gui — display / identification
+# ---------------------------------------------------------------------------
 Gui:
-    Game Name: "WE 2008 PS2 SLPM_668.85"
+    # Human-readable name shown in the title bar and Game Version menu.
+    Game Name: "Unknown — select game version from Edit > Game Version"
 
+
+# ---------------------------------------------------------------------------
+# option_file_data — binary layout of the option file itself
+#
+# Game Identifier  : list of disc ID strings (e.g. ["BESLES-52760PES4OPT"])
+#                    used to auto-detect the game when opening a .psu file.
+#                    Multiple IDs cover regional variants of the same game.
+# ENCRYPTED        : true for all retail PS2 option files; false for PSP.
+# OF_BYTE_LENGTH   : total size of the option file data (not including the
+#                    .psu header).  Must match exactly or the file is rejected.
+# OF_BLOCK         : list of byte offsets where each data block starts.
+#                    Blocks are: [0]=shop/settings, [1]=shop items, [2]=stadium
+#                    names, [3]=edited players, [4]=players, [5]=team rosters,
+#                    [6]=clubs, [7]=kits, [8]=emblems, [9]=leagues, [10]=misc.
+# OF_BLOCK_SIZE    : list of block sizes in bytes, parallel to OF_BLOCK.
+# ---------------------------------------------------------------------------
 option_file_data:
-    Game Identifier : [
-        "BISLPM-66885WE11OPT",
-    ]
-    ENCRYPTED : True
-    OF_BYTE_LENGTH : 1107968
-    OF_BLOCK : [
-        12, 
-        5144, 
-        7196, 
-        11876, 
-        34704, 
-        666704, 
-        763968,
-        777004, 
-        928696, 
-        1084332,
-        1086528,
-    ]
+    Game Identifier : []
+    ENCRYPTED       : True
+    OF_BYTE_LENGTH  : 0
+    OF_BLOCK        : []
+    OF_BLOCK_SIZE   : []
 
-    OF_BLOCK_SIZE : [
-        4852, 
-        1884, 
-        4668, 
-        22816, 
-        631160, 
-        97250,
-        13024, 
-        151680, 
-        155624, 
-        2184,
-        21420,
-    ]
 
+# ---------------------------------------------------------------------------
+# Player — player record layout and roster boundaries
+#
+# Size             : bytes per player record (124 for standard PS2 WE/PES).
+# First Unused     : index of the first player slot that is genuinely empty.
+#                    All slots below this index contain real player data.
+# First Edited Id  : index boundary between regular and edited players.
+#                    Standard value: 32768 (0x8000).  Edited players are stored
+#                    in B[3]; their in-file indices start at this value.
+# ML Legend Slots  : number of Master League legend player slots.
+# ML Youth Slots   : number of Master League youth player slots.
+# Shop Slots       : number of shop player slots.
+# ML Default Slots : number of Master League default squad player slots.
+#
+# The ML/shop slot counts define index boundaries relative to First Unused:
+#   first_ml_old     = First Unused  - ML Legend Slots
+#   first_ml_youth   = first_ml_old  - ML Youth Slots
+#   first_shop       = first_ml_youth - Shop Slots
+#   first_ml_default = first_shop    - ML Default Slots
+# ---------------------------------------------------------------------------
 Player:
-    First Unused : 5084
+    Size             : 124
+    First Unused     : 0
+    First Edited Id  : 32768
+    ML Legend Slots  : 10
+    ML Youth Slots   : 140
+    Shop Slots       : 160
+    ML Default Slots : 28
 
+
+# ---------------------------------------------------------------------------
+# Teams — team counts and roster geometry
+#
+# Total Nations        : number of national team slots (0 for J-League games).
+# Total Classic        : number of classic national team slots.
+# Total J Nations      : number of J-League national team slots.
+# Total J Clubs        : number of J-League club team slots.
+# J League Extra Clubs : clubs in B[6] that are J-League-only and excluded
+#                        from the standard club count:
+#                        Team.total_clubs = Club.total - J League Extra Clubs
+# Max Players In Nations : squad size for national teams (typically 23).
+# Max Players In Clubs   : squad size for club teams (typically 32).
+# Separator Size       : extra gap bytes between national and club roster data.
+# ---------------------------------------------------------------------------
 Teams:
-    Total Nations : 57
-    Total Classic : 7
-    Total J Nations : 2
-    Total J Clubs : 0
+    Total Nations          : 0
+    Total Classic          : 0
+    Total J Nations        : 0
+    Total J Clubs          : 0
+    J League Extra Clubs   : 0
     Max Players In Nations : 23
-    Max Players In Clubs : 32
-    Separator Size : 0
+    Max Players In Clubs   : 32
+    Separator Size         : 0
+    Total ML Slots         : 3     # ML squad slot groups (3 for most games, 4 for PES2013+)
 
 
+# ---------------------------------------------------------------------------
+# Club — club record layout
+#
+# Size             : bytes per club record (88 standard; 92 for J-League CC).
+# Max Abbr Name Size : maximum characters in the abbreviated club name (3 or 10).
+# First Emblem     : index of the first national-team emblem slot.
+# First Club Emblem: index of the first club emblem slot.
+#
+# Field offsets within the club record are derived as (Club.size - N):
+#   stadium field  : Size - 7
+#   supp colour    : Size - 8
+#   flag style     : Size - 18
+#   colour 1       : Size - 16
+#   emblem index   : Size - 28   (0x99 = no custom emblem)
+# These are computed in option_file.py and need no separate YAML keys unless
+# the club record layout changes in a future-discovered title.
+# ---------------------------------------------------------------------------
 Club:
-    Size : 88
-    Max Abbr Name Size : 3
-    First Emblem : 356
-    First Club Emblem : 120
+    Size              : 88
+    Max Abbr Name Size: 3
+    First Emblem      : 0
+    First Club Emblem : 0
 
+
+# ---------------------------------------------------------------------------
+# Stadiums — stadium name table layout
+#
+# Total      : number of stadium slots.
+# Max Lenght : [sic — matches the typo present in all game YAMLs]
+#              maximum byte length of a stadium name string, including the
+#              null terminator.  Standard: 61.  J-League CC: 73.
+#
+# Derived addresses (computed in option_file.py, not YAML keys):
+#   START_ADDRESS = OF_BLOCK[2]
+#   SW_ADDR       = START_ADDRESS + Max Lenght * Total
+#   END_ADDR      = SW_ADDR + Total
+# ---------------------------------------------------------------------------
 Stadiums:
-    Total : 35
+    Total      : 0
     Max Lenght : 61
 
+
+# ---------------------------------------------------------------------------
+# Leagues — league name table layout
+#
+# Total : number of league slots.
+#
+# Derived in option_file.py:
+#   START_ADDRESS = Stadium.END_ADDR + Stadium.MAX_LEN + 1
+#   Record size   = 20 (base name length) + 1 (flags) + Max Lenght + 2 (pad)
+# ---------------------------------------------------------------------------
 Leagues:
-    Total : 29
+    Total : 0
 
+
+# ---------------------------------------------------------------------------
+# Kits — kit data block sizes
+#
+# Nation Kit Data Size : bytes per national-team kit record.
+# Club Kit Data Size   : bytes per club kit record.
+# Kit Data Size        : bytes per individual kit (home/away/etc.) within a record.
+#
+# Derived addresses (computed in option_file.py):
+#   start_address      = OF_BLOCK[7]
+#   start_address_club = start_address + (total_nat_slots * Nation Kit Data Size)
+#   end_address        = start_address_club + total_clubs * Club Kit Data Size
+# ---------------------------------------------------------------------------
 Kits:
-    Nation Kit Data Size : 352
-    Club Kit Data Size : 544
-    Kit Data Size : 62
+    Nation Kit Data Size : 0
+    Club Kit Data Size   : 0
+    Kit Data Size        : 0
 
+
+# ---------------------------------------------------------------------------
+# Logo — club/national logo image block
+#
+# Total : number of logo slots (80 for standard EUR/JAP PES; 0 for some ASIA).
+# Size  : bytes per logo record (typically 608 = 32-byte header + 32×32 @ 4bpp).
+#
+# Fixed constants (same for all games, defined in logo.py):
+#   header_size = 32 bytes, width = 32px, height = 32px, bpp = 4
+#
+# Derived address (computed in option_file.py):
+#   start_address = Kits.end_address
+# ---------------------------------------------------------------------------
+Logo:
+    Total : 0
+    Size  : 608
+
+
+# ---------------------------------------------------------------------------
+# Emblem — club/national badge image block
+#
+# Total    : number of 128×128 emblem slots (50 standard; 21 for WE 2011 ASIA).
+# Size 128 : bytes per high-res emblem record (standard: 5184).
+# Size 16  : bytes per 16×16 thumbnail record (standard: 2176).
+#
+# Fixed constants (same for all games, defined in emblems.py):
+#   empty_idx_value = 0x99 (153) — value in club record meaning no custom emblem
+#   bpp_128 = 8, bpp_16 = 4, width = 64, height = 64
+#
+# Derived address (computed in option_file.py):
+#   emblem block starts at OF_BLOCK[8]
+# ---------------------------------------------------------------------------
+Emblem:
+    Total   : 50
+    Size 128: 5184
+    Size 16 : 2176
+
+
+# ---------------------------------------------------------------------------
+# Formation — tactical formation data block
+#
+# Size     : bytes per full formation record (standard: 364).
+# Alt Size : bytes per alternate formation record (standard: 82).
+#
+# Fixed constants (same for all games, defined in formation.py):
+#   jobs_count = 6, settings_count = 4, player_count = 11
+# ---------------------------------------------------------------------------
+Formation:
+    Size    : 364
+    Alt Size: 82
+
+
+# ---------------------------------------------------------------------------
+# Shop — shop points and item unlock data
+#
+# Points Offset       : byte offset of the encrypted shop points copy (copy 2).
+#                       Copy 1 is always at offset 52 in B[0] (unencrypted),
+#                       hardcoded as Shop.POINTS_OFFSET_1 in shop.py.
+# Unlock Offset Start : first byte of the item-unlock sequence in B[1].
+#                       Defaults to OF_BLOCK[1] if not specified.
+# Unlock Offset End   : last byte of the item-unlock sequence.
+#                       Defaults to Unlock Offset Start + 25 if not specified.
+# ---------------------------------------------------------------------------
 Shop:
-    Points Offset : 5208
-    Has Background Selector : False
-    Total Backgrounds : 0
+    Points Offset       : 0
+    Unlock Offset Start : 0
+    Unlock Offset End   : 0
 
-NATIONS : [
-"AUSTRIA",
-"BELGIUM",
-"BULGARIA",
-"CROATIA",
-"CZECH REPUBLIC", 
-"DENMARK", 
-"ENGLAND", 
-"FINLAND", 
-"FRANCE", 
-"GERMANY", 
-"GREECE", 
-"HUNGARY", 
-"IRELAND", 
-"ISRAEL", 
-"ITALY", 
-"NETHERLANDS", 
-"NORTHERN IRELAND", 
-"NORWAY", 
-"POLAND", 
-"PORTUGAL", 
-"ROMANIA", 
-"RUSSIA", 
-"SCOTLAND", 
-"SERBIA", 
-"SLOVAKIA", 
-"SLOVENIA", 
-"SPAIN", 
-"SWEDEN", 
-"SWITZERLAND", 
-"TURKEY", 
-"UKRAINE", 
-"WALES", 
-"ALGERIA", 
-"CAMEROON", 
-"IVORY COAST", 
-"EGYPT", 
-"GHANA", 
-"NIGERIA", 
-"SOUTH AFRICA", 
-"TOGO", 
-"CANADA", 
-"HONDURAS", 
-"MEXICO", 
-"UNITED STATES", 
-"ARGENTINA", 
-"BRAZIL", 
-"CHILE", 
-"COLOMBIA", 
-"ECUADOR", 
-"PARAGUAY", 
-"PERU", 
-"URUGUAY", 
-"AUSTRALIA", 
-"CHINA", 
-"JAPAN", 
-"NORTH KOREA", 
-"SAUDI ARABIA", 
-"SOUTH KOREA", 
-"UAE", 
-"NEW ZEALAND", 
-"MONACO", 
-"BENIN", 
-"BURKINA FASO", 
-"BURUNDI", 
-"CAPE VERDE", 
-"CENTRAL AFRICAN REP.", 
-"CHAD", 
-"CONGO", 
-"DR CONGO", 
-"EQUATORIAL GUINEA", 
-"GABON", 
-"REPUBLIC OF THE GAMBIA", 
-"GUINEA-BISSAU", 
-"KENYA", 
-"LIBERIA", 
-"LIBYA", 
-"MADAGASCAR", 
-"MOZAMBIQUE", 
-"NIGER", 
-"RWANDA", 
-"SIERRA LEONE", 
-"ZAMBIA", 
-"ZIMBABWE", 
-"ARUBA", 
-"BARBADOS", 
-"CUBA", 
-"EL SALVADOR", 
-"GRENADA", 
-"GUADELOUPE", 
-"GUATEMALA", 
-"HAITI", 
-"JAMAICA", 
-"MARTINIQUE", 
-"NETHERLANDS ANTILLES", 
-"PANAMA", 
-"SINT MAARTEN", 
-"PHILIPPINES", 
-"VIETNAM", 
-"SOLOMON ISLANDS", 
-"Free Nationality", 
-"Solid Color", 
-"My Team", 
-"ALBANIA", 
-"ANDORRA", 
-"ARMENIA", 
-"AZERBAIJAN",
-"BELARUS", 
-"BOSNIA AND HERZEGOVINA", 
-"CYPRUS", 
-"ESTONIA", 
-"FAROE ISLANDS", 
-"GEORGIA", 
-"ICELAND", 
-"KAZAKHSTAN", 
-"LATVIA", 
-"LIECHTENSTEIN", 
-"LITHUANIA", 
-"LUXEMBOURG", 
-"MACEDONIA", 
-"MALTA", 
-"MOLDOVA", 
-"MONTENEGRO", 
-"SAN MARINO", 
-"ANGOLA", 
-"GUINEA", 
-"MALI", 
-"MOROCCO", 
-"SENEGAL", 
-"TUNISIA", 
-"COSTA RICA", 
-"TRINIDAD AND TOBAGO", 
-"BOLIVIA", 
-"VENEZUELA", 
-"BAHRAIN", 
-"IRAN", 
-"IRAQ", 
-"KUWAIT", 
-"OMAN", 
-"QATAR", 
-"SYRIA", 
-"THAILAND", 
-"UZBEKISTAN",
-]
 
-CLASSIC TEAMS : [
-"Classic England",
-"Classic France",
-"Classic Germany",
-"Classic Italy",
-"Classic Netherlands",
-"Classic Argentina",
-"Classic Brazil",
-]
+# ---------------------------------------------------------------------------
+# NATIONS — ordered list of nation/nationality names
+#
+# Used to populate the nationality dropdown in the player editor.
+# Index N in this list corresponds to nationality value N in the player record.
+# Leave empty ([]) for J-League games that have no national teams.
+# ---------------------------------------------------------------------------
+NATIONS : []
 
+
+# ---------------------------------------------------------------------------
+# CLASSIC TEAMS — ordered list of classic team names
+#
+# Used to build the team name list when Total Classic > 0.
+# Must contain exactly Total Classic entries.
+# Leave empty ([]) when Total Classic = 0.
+# ---------------------------------------------------------------------------
+CLASSIC TEAMS : []
+
+
+# ---------------------------------------------------------------------------
+# GROWTH TYPES — player growth type value ranges
+#
+# Each list contains the player index values (in the YAML integer list format)
+# that correspond to that growth type.  Used by pes_stat.py to map a raw
+# growth byte to a human-readable growth type label and vice versa.
+#
+# Growth type order matches GROWTH_TYPE_NAMES in utils/constants.py:
+#   EARLY, EARLY LASTING, STANDARD, STANDARD LASTING, LATE, LATE LASTING
+# ---------------------------------------------------------------------------
 GROWTH TYPES:
-
-    EARLY: [
-        128,
-        130,
-        141,
-        146,
-        149,
-        154,
-        164,
-        166,
-        168,
-        170,
-        174,
-        175,
-        176,
-        178,
-        188,
-        190,
-        210,
-        212,
-        244,
-        248,
-        0,
-        9,
-        49,
-        105,
-        118,
-        123,
-        124,
-        126,
-    ]
-
-    EARLY LASTING : [
-        136,
-        142,
-        148,
-        161,
-        172,
-        173,
-        189,
-        193,
-        202,
-        204,
-        220,
-        242,
-        247,
-        25,
-        51,
-        67,
-        70,
-        82,
-        88,
-        89,
-        107,
-        121,
-        127,
-    ]
-
-    STANDARD : [
-        132,
-        139,
-        144,
-        145,
-        147,
-        150,
-        152,
-        153,
-        155,
-        159,
-        162,
-        165,
-        169,
-        177,
-        179,
-        180,
-        181,
-        183,
-        187,
-        192,
-        194,
-        198,
-        200,
-        201,
-        203,
-        208,
-        213,
-        214,
-        221,
-        231,
-        234,
-        235,
-        239,
-        243,
-        245,
-        246,
-        249,
-        1,
-        3,
-        4,
-        6,
-        12,
-        16,
-        18,
-        19,
-        20,
-        26,
-        28,
-        29,
-        30,
-        31,
-        40,
-        42,
-        52,
-        53,
-        54,
-        55,
-        56,
-        57,
-        58,
-        59,
-        60,
-        61,
-        62,
-        63,
-        65,
-        68,
-        69,
-        72,
-        73,
-        74,
-        75,
-        76,
-        77,
-        78,
-        79,
-        80,
-        83,
-        84,
-        85,
-        87,
-        94,
-        95,
-        97,
-        100,
-        101,
-        104,
-        106,
-        112,
-        114,
-        115,
-        116,
-        119,
-        120,
-        122,
-        125,
-
-    ]
-
-    STANDARD LASTING : [
-        129,
-        131,
-        135,
-        138,
-        143,
-        151,
-        160,
-        182,
-        186,
-        191,
-        195,
-        196,
-        211,
-        216,
-        223,
-        227,
-        230,
-        237,
-        240,
-        251,
-        5,
-        7,
-        11,
-        13,
-        14,
-        15,
-        23,
-        32,
-        34,
-        36,
-        38,
-        47,
-        48,
-        81,
-        91,
-        92,
-        96,
-        99,
-        108,
-        110,
-        113,
-    ]
-
-    LATE : [
-        133,
-        137,
-        140,
-        156,
-        157,
-        158,
-        163,
-        171,
-        184,
-        185,
-        199,
-        206,
-        207,
-        209,
-        215,
-        217,
-        219,
-        218,
-        225,
-        232,
-        233,
-        238,
-        241,
-        252,
-        2,
-        8,
-        17,
-        21,
-        22,
-        33,
-        35,
-        37,
-        39,
-        43,
-        44,
-        46,
-        64,
-        66,
-        71,
-        86,
-        93,
-        98,
-        102,
-        103,
-        109,
-        111,
-        117,
-    ]
-
-    LATE LASTING : [
-        134,
-        167,
-        197,
-        205,
-        224,
-        228,
-        250,
-        253,
-        254,
-        10,
-        24,
-        41,
-        90,
-    ]
-
-
+    EARLY            : []
+    EARLY LASTING    : []
+    STANDARD         : []
+    STANDARD LASTING : []
+    LATE             : []
+    LATE LASTING     : []
